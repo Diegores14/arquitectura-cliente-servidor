@@ -1,6 +1,7 @@
 import zmq
 import hashlib
 import os
+import json
 
 
 context = zmq.Context()
@@ -26,7 +27,8 @@ def submit(path):
 
     # Save NameFile with your respect hash 
     Files[os.path.basename(path)] = sha1.hexdigest()
-
+    with open("datos.json", "w") as f:
+        json.dump(Files, f)
     # Submit File in the server
     name = sha1.hexdigest().encode()                            # File's hash
     socket.send_multipart([b"create", name])                    # Create File In server
@@ -57,8 +59,19 @@ def add(value):
     print("Escribe el nombre del archivo con extension")
     nombre = input()
     Files[nombre] = value
+    with open("datos.json", "w") as f:
+        json.dump(Files, f)
 
 switcher = { "submit" : submit, "download" : download, "add" : add}
+
+with open("datos.json", "a+") as f:
+    f.seek(0)
+    data = f.read(1)
+    if not data:
+        f.write("{}")
+
+with open("datos.json") as myFiles:
+    Files = json.load(myFiles)
 
 while True:
     valor = input().split()
@@ -67,3 +80,5 @@ while True:
     else:
         if valor[0] in switcher:
             switcher[valor[0]](valor[1])
+        else :
+            print("esta mal escrito")
