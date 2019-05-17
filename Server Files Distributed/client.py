@@ -63,16 +63,16 @@ def submit(path):
 
 # This for Download Files
 def download(name):
+    socket.send_multipart([b"Download", Files[name].encode()])
+    fileServers = socket.recv_json()
+    dirSockets = {}
     with open(name, "wb") as f:
-        pos = 0
-        while True :
-            socket.send_multipart([b"download", Files[name].encode(), str(pos).encode()])
-            ans = socket.recv()
-            if b"Finish" == ans:
-                print("Done")
-                break
-            f.write(ans)
-            pos += sizeBuf
+        for x in fileServers['file']:
+            if not x[1] in dirSockets:
+                dirSockets[x[1]] = context.socket(zmq.REQ)
+                dirSockets[x[1]].connect("tcp://" + x[1])
+            dirSockets[x[1]].send_multipart([b"download", x[0].encode()])
+            f.write(dirSockets[x[1]].recv())
 
 # This is for share 
 def add(value):

@@ -81,7 +81,7 @@ class Proxy:
         self.socket.bind("tcp://" + self.IP + ":" + self.Port)     # Escuchamos por la IP y puerto definidos anteriormente.
         self.servers = [("", 0)] * self.tam                    # Lista de los servidores
         self.database = trie()
-        self.switcher = {"create": self.create, "assignServers" : self.assignServers, "addServer": self.addServer}
+        self.switcher = {"create": self.create, "assignServers" : self.assignServers, "addServer": self.addServer, "Download": self.download}
         self.st = segmentTree(self.tam)
         print("Proxy ON")
         while True :
@@ -129,6 +129,12 @@ class Proxy:
                     self.st.build(1, 0, self.tam)
                 i += 1
             json.dump(fileHashServers, f)
+        self.socket.send_json(fileHashServers)
+
+    def download(self, data) :
+        fileHashServers = {}
+        with open(data[1].decode()) as f:
+            fileHashServers = json.load(f)
         self.socket.send_json(fileHashServers)
 
 

@@ -48,12 +48,8 @@ def submit(data) :
 def download(data) :
     name = data[1].decode()
     with open(name, "rb") as f:
-        f.seek( int( data[2].decode() ) )
-        data = f.read(sizePart)
-        if not data:
-            socket.send(b"Finish")
-        else :
-            socket.send(data)
+        data = f.read()
+        socket.send(data)
     print("download")
 
 switcher = {"create": create, "submit" : submit, "download": download}
